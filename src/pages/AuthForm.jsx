@@ -1,117 +1,65 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "./AuthContext";
 
 function AuthForm() {
-  const [isRegister, setIsRegister] = useState(false);
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    konfirmasiPassword: "",
-  });
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+  // Ambil halaman tujuan asal dari state, atau default ke Beranda ("/")
+  const from = location.state?.from?.pathname || "/";
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!email || !password) return alert("Isi email dan password!");
 
-    // Validasi Email
-    if (!form.email.includes("@")) {
-      setError("Email Tidak Valid");
-      return;
-    }
+    // Proses login
+    login({ email });
 
-    // Validasi Panjang password
-    if (form.password.length < 6) {
-      setError("Password minimal 6 karakter");
-      return;
-    }
-
-    // Validasi Konfirmasi Password (Register Only)
-    if (isRegister && form.password !== form.konfirmasiPassword) {
-      setError("Konfirmasi Password Tidak Cocok!");
-      return;
-    }
-
-    setError("");
-    alert(isRegister ? "Register Berhasil!" : "Login Berhasil!");
+    // Pindahkan langsung ke halaman keranjang (atau lokasi asal)
+    navigate(from, { replace: true });
   };
 
   return (
-    <div className="max-w-md mx-auto my-12 p-6 bg-white border rounded-xl shadow-md">
-      <h2 className="text-2xl font-bold text-center mb-6">
-        {isRegister ? "Registrasi Akun" : "Login"}
-      </h2>
-
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            placeholder="nama@email.com"
-            className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <input
-            type="password"
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            placeholder="******"
-            className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Input Tambahan Khusus Registrasi */}
-        {isRegister && (
+    <div className="flex min-h-[80vh] items-center justify-center px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md border border-slate-200">
+        <h2 className="text-center text-2xl font-bold text-slate-900">Masuk Akun</h2>
+        
+        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Konfirmasi Password
-            </label>
+            <label className="block text-sm font-medium text-slate-700">Email</label>
             <input
-              type="password"
-              name="konfirmasiPassword"
-              value={form.konfirmasiPassword}
-              onChange={handleChange}
-              placeholder="******"
-              className="w-full p-2.5 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+              type="email"
+              placeholder="nama@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-blue-600"
             />
           </div>
-        )}
 
-        {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
+          <div>
+            <label className="block text-sm font-medium text-slate-700">Password</label>
+            <input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-slate-300 p-2.5 text-sm outline-none focus:border-blue-600"
+            />
+          </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-        >
-          {isRegister ? "Daftar" : "Masuk"}
-        </button>
-      </form>
-
-      {/* Switch Form Mode */}
-      <p className="text-center text-sm text-gray-600 mt-4">
-        {isRegister ? "Sudah punya akun?" : "Belum punya akun?"}{" "}
-        <button
-          onClick={() => {
-            setIsRegister(!isRegister);
-            setError("");
-          }}
-          className="text-blue-600 font-semibold underline"
-        >
-          {isRegister ? "Login" : "Daftar"}
-        </button>
-      </p>
+          <button
+            type="submit"
+            className="mt-2 w-full rounded-lg bg-blue-600 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+          >
+            Masuk
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
